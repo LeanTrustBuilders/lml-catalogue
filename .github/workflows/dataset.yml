@@ -1,0 +1,45 @@
+name: Dataset
+
+# Builds the catalogue against LeanMachineLearning at the commit in lakefile.toml, extracts its dataset
+# with the extractor's action (the catalogue's theorems as the project, the LeanMachineLearning and
+# Mathlib declarations they mention as upstream nodes, with the annotations), and publishes it as the
+# release dataset-<commit12>. site-pilot merges it into LeanMachineLearning's dataset of the same
+# commit (evidence-core merge).
+#
+# With it, the well-definedness analysis of LeanMachineLearning's bandit statements against the
+# domains this catalogue and the Mathlib catalogue declare (trust-extract welldefined): every theorem
+# of LeanMachineLearning.Online.Bandit, the regret bound of UCB among them. The two catalogues'
+# tactics are tried after the analyzer's default dischargers.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dataset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Room on the runner
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - name: Build the catalogue
+        uses: leanprover/lean-action@v1
+      - name: Name the dataset
+        run: echo "TAG=dataset-$(git rev-parse HEAD | cut -c1-12)" >> "$GITHUB_ENV"
+      - name: Extract and publish
+        uses: LeanTrustBuilders/extractor/extract@main
+        with:
+          root: LMLCatalogue
+          repo: ${{ github.repository }}
+          # Lean's kernel checks the catalogue's closures, proofs included.
+          check: meaning
+          welldefined: true
+          welldefined-args: >-
+            --module LeanMachineLearning --module MathlibCatalogue --module LMLCatalogue
+            --theorems-in LeanMachineLearning.Online.Bandit
+            --discharger mathlib_catalogue_discharger --discharger lml_catalogue_discharger --jobs 4
+          publish: ${{ env.TAG }}
+          title: LeanMachineLearning catalogue ${{ github.sha }}

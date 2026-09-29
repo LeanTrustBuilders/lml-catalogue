@@ -1,0 +1,25 @@
+name = "LMLCatalogue"
+defaultTargets = ["LMLCatalogue"]
+
+# LeanMachineLearning at the commit whose dataset site-pilot publishes (lml-dataset-<commit12>): merging
+# this catalogue's dataset into it checks that the two agree. Its Mathlib is the one everything here is
+# built against, the Mathlib catalogue's included, so LeanMachineLearning comes first.
+[[require]]
+name = "LeanMachineLearning"
+git = "https://github.com/LeanMachineLearning/LML"
+rev = "d707a02e790662645fc06cc69d19b65d8f6bfd78"
+
+# The domains of Mathlib's definitions (the Bochner integral, the logarithm, …), for the analysis of
+# LeanMachineLearning's statements, and its discharger.
+[[require]]
+name = "MathlibCatalogue"
+git = "https://github.com/LeanTrustBuilders/mathlib-catalogue"
+rev = "main"
+
+[[require]]
+name = "TrustAnnotations"
+git = "https://github.com/LeanTrustBuilders/annotations"
+rev = "main"
+
+[[lean_lib]]
+name = "LMLCatalogue"
