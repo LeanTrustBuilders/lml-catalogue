@@ -27,6 +27,8 @@ jobs:
         run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
       - name: Build the catalogue
         uses: leanprover/lean-action@v1
+      - name: Build all of LeanMachineLearning, which the analysis imports
+        run: lake build LeanMachineLearning 2>&1 | tail -3
       - name: Name the dataset
         run: echo "TAG=dataset-$(git rev-parse HEAD | cut -c1-12)" >> "$GITHUB_ENV"
       - name: Extract and publish
